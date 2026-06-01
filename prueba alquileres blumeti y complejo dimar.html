@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Panel de Alquileres - Familia</title>
+<meta name="theme-color" content="#1e3a8a"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="Alquileres"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<link rel="manifest" href="data:application/json,{%22name%22:%22Panel%20de%20Alquileres%22,%22short_name%22:%22Alquileres%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22%23f8fafc%22,%22theme_color%22:%22%231e3a8a%22,%22icons%22:[{%22src%22:%22data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A//www.w3.org/2000/svg'%20viewBox%3D'0%200%20100%20100'%3E%3Crect%20width%3D'100'%20height%3D'100'%20rx%3D'20'%20fill%3D'%231e3a8a'/%3E%3Ctext%20y%3D'.9em'%20font-size%3D'80'%20x%3D'10'%3E%F0%9F%8F%A0%3C/text%3E%3C/svg%3E%22,%22sizes%22:%22192x192%22,%22type%22:%22image/svg+xml%22}]}"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:#f8fafc;padding:0}
+input,select,button{font-family:inherit}
+.banner{background:#1e3a8a;color:#fff;text-align:center;padding:7px;font-size:12px;letter-spacing:.3px}
+@keyframes pulse{0%,100%{opacity:.3}50%{opacity:1}}
+</style>
+</head>
+<body>
+<div class="banner">👁️ Modo solo lectura — Para modificaciones contactar al administrador</div>
+<div id="root"></div>
+<script type="text/babel">
+const{useState,useRef,useEffect}=React;
+const MESES=["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+const today=new Date(2026,5,1);
+
+function addYear(d){if(!d)return null;const dt=new Date(d);dt.setFullYear(dt.getFullYear()+1);return dt.toISOString().slice(0,10);}
+function proximaActualizacion(inicio){if(!inicio)return null;let d=new Date(inicio);while(d<=today)d.setMonth(d.getMonth()+3);return d;}
+function getEstado(p){if(!p.inquilino)return"libre";return new Date(p.fin)>=today?"activo":"vencido";}
+function diffDays(d){if(!d)return null;return Math.ceil((new Date(d)-today)/(1000*60*60*24));}
+function fmt(n){return n?"$"+n.toLocaleString("es-AR"):"-";}
+function fmtDate(d){if(!d)return"-";const[y,m,day]=d.split("-");return`${day}/${m}/${y}`;}
+function fmtDateObj(d){if(!d)return"-";return`${String(d.getDate()).padStart(2,"0")}/${String(d.getMonth()+1).padStart(2,"0")}/${d.getFullYear()}`;}
+
+const dirs=[
+  {id:1,nombre:"Blumetti 180",   ciudad:"Cinco Saltos",notas:"2 locales + 10 departamentos"},
+  {id:2,nombre:"Complejo Dimas", ciudad:"Cinco Saltos",notas:"23 departamentos"},
+];
+
+const props_data=[
+  {id:1, propiedad:"LOCAL 1",    inquilino:"TOLA",                inicio:"2026-03-01",inicial:98000, cuotaActual:1014075,cuotas:29,mesActualizacion:"Junio", responsable:"",notas:"",    direccionId:1},
+  {id:2, propiedad:"LOCAL 2",    inquilino:"",                    inicio:"2022-05-01",inicial:0,     cuotaActual:0,      cuotas:0, mesActualizacion:"",      responsable:"",notas:"",    direccionId:1},
+  {id:3, propiedad:'P. ALT "A"', inquilino:"",                    inicio:"2025-04-13",inicial:0,     cuotaActual:0,      cuotas:13,mesActualizacion:"",      responsable:"",notas:"icl", direccionId:1},
+  {id:4, propiedad:'P. ALT "B"', inquilino:"",                    inicio:"2022-09-01",inicial:0,     cuotaActual:0,      cuotas:0, mesActualizacion:"",      responsable:"",notas:"",    direccionId:1},
+  {id:5, propiedad:'P. ALT "C"', inquilino:"LUZ MARIA VALDEZ",   inicio:"2025-07-01",inicial:530000,cuotaActual:623253, cuotas:10,mesActualizacion:"Julio", responsable:"",notas:"",    direccionId:1},
+  {id:6, propiedad:'P. ALT "D"', inquilino:"NEYEN VAVRIK",       inicio:"2026-04-01",inicial:890000,cuotaActual:890000, cuotas:1, mesActualizacion:"Julio", responsable:"",notas:"icl", direccionId:1},
+  {id:7, propiedad:'P. ALT "E"', inquilino:"ACUÑA B MIGUEL HIJO",inicio:"2026-03-01",inicial:950000,cuotaActual:950000, cuotas:2, mesActualizacion:"Junio", responsable:"",notas:"icl", direccionId:1},
+  {id:8, propiedad:'P. ALT "F"', inquilino:"CENTENO GASTON",     inicio:"2026-02-09",inicial:890000,cuotaActual:890000, cuotas:16,mesActualizacion:"Junio", responsable:"",notas:"",    direccionId:1},
+  {id:9, propiedad:'P. ALT "G"', inquilino:"ACUÑA MIGUEL HIJO",  inicio:"2026-03-01",inicial:28500, cuotaActual:912000, cuotas:47,mesActualizacion:"Junio", responsable:"",notas:"",    direccionId:1},
+  {id:10,propiedad:'P. BJ "A"',  inquilino:"ALEJO OLIVERA",      inicio:"2025-11-15",inicial:680000,cuotaActual:680000, cuotas:6, mesActualizacion:"Junio", responsable:"",notas:"",    direccionId:1},
+  {id:11,propiedad:'P. BJ "B"',  inquilino:"",                   inicio:null,        inicial:0,     cuotaActual:0,      cuotas:0, mesActualizacion:"",      responsable:"NICO",notas:"icl",direccionId:1},
+  {id:12,propiedad:'P. BJ "C"',  inquilino:"",                   inicio:null,        inicial:0,     cuotaActual:0,      cuotas:0, mesActualizacion:"",      responsable:"",notas:"icl", direccionId:1},
+  ...Array.from({length:23},(_,i)=>({
+    id:13+i, propiedad:`DPTO ${String(i+1).padStart(2,"0")}`, inquilino:"",
+    inicio:null, inicial:0, cuotaActual:0, cuotas:0,
+    mesActualizacion:"", responsable:"", notas:"", direccionId:2
+  })),
+].map(p=>({...p,fin:addYear(p.inicio)}));
+
+function StatusBadge({estado,fin}){
+  const days=diffDays(fin);
+  let color,label;
+  if(estado==="libre"){color="#6b7280";label="🔘 Libre";}
+  else if(estado==="vencido"){color="#dc2626";label="🔴 Vencido";}
+  else if(days!==null&&days<=60){color="#d97706";label=`🟡 ${days}d`;}
+  else{color="#16a34a";label="🟢 Activo";}
+  return <span style={{background:color,color:"#fff",borderRadius:12,padding:"2px 10px",fontSize:11,fontWeight:600,whiteSpace:"nowrap"}}>{label}</span>;
+}
+
+function DireccionCard({dir,props}){
+  const[open,setOpen]=useState(false);
+  const activos=props.filter(p=>getEstado(p)==="activo");
+  const libres=props.filter(p=>getEstado(p)==="libre");
+  const vencidos=props.filter(p=>getEstado(p)==="vencido");
+  const total=activos.reduce((s,p)=>s+p.cuotaActual,0);
+  return(
+    <div style={{background:"#fff",borderRadius:12,boxShadow:"0 1px 4px rgba(0,0,0,.08)",overflow:"hidden",marginBottom:12}}>
+      <div onClick={()=>setOpen(o=>!o)} style={{padding:"14px 16px",cursor:"pointer",display:"flex",alignItems:"center",gap:12,borderBottom:open?"1px solid #f1f5f9":"none"}}>
+        <span style={{fontSize:22}}>{open?"📂":"📁"}</span>
+        <div style={{flex:1}}>
+          <div style={{fontWeight:700,fontSize:16,color:"#1e293b"}}>{dir.nombre}</div>
+          <div style={{fontSize:12,color:"#64748b",marginTop:2}}>{dir.ciudad}{dir.notas?` · ${dir.notas}`:""}</div>
+        </div>
+        <div style={{display:"flex",gap:6,flexWrap:"wrap",alignItems:"center"}}>
+          <span style={{background:"#f0fdf4",color:"#16a34a",borderRadius:8,padding:"2px 8px",fontSize:12,fontWeight:600}}>🟢{activos.length}</span>
+          <span style={{background:"#f8fafc",color:"#6b7280",borderRadius:8,padding:"2px 8px",fontSize:12,fontWeight:600}}>🔘{libres.length}</span>
+          {vencidos.length>0&&<span style={{background:"#fef2f2",color:"#dc2626",borderRadius:8,padding:"2px 8px",fontSize:12,fontWeight:600}}>🔴{vencidos.length}</span>}
+          <span style={{background:"#eff6ff",color:"#2563eb",borderRadius:8,padding:"2px 8px",fontSize:12,fontWeight:600}}>{fmt(total)}</span>
+          <span style={{color:"#94a3b8"}}>{open?"▲":"▼"}</span>
+        </div>
+      </div>
+      {open&&(
+        <div style={{padding:"10px 16px"}}>
+          {props.map(p=>{
+            const estado=getEstado(p);
+            return(
+              <div key={p.id} style={{display:"flex",alignItems:"center",gap:10,padding:"7px 10px",background:estado==="vencido"?"#fef2f2":estado==="libre"?"#f8fafc":"#f0fdf4",borderRadius:8,marginBottom:5}}>
+                <div style={{flex:1}}>
+                  <span style={{fontWeight:600,fontSize:13}}>{p.propiedad}</span>
+                  <span style={{fontSize:12,color:"#64748b",marginLeft:8}}>{p.inquilino||"—"}</span>
+                </div>
+                <span style={{fontSize:12,color:"#2563eb",fontWeight:600}}>{fmt(p.cuotaActual)}</span>
+                <StatusBadge estado={estado} fin={p.fin}/>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function PagosView({props}){
+  const[mes,setMes]=useState(5);const[anio,setAnio]=useState(2026);
+  const[pagos,setPagos]=useState({});
+  const key=id=>`${anio}-${mes}-${id}`;
+  const toggle=id=>setPagos(p=>({...p,[key(id)]:p[key(id)]==="pagado"?"pendiente":"pagado"}));
+  const activos=props.filter(p=>getEstado(p)==="activo");
+  return(
+    <div>
+      <div style={{display:"flex",gap:10,alignItems:"center",marginBottom:16,flexWrap:"wrap"}}>
+        <select value={mes} onChange={e=>setMes(Number(e.target.value))} style={{padding:"6px 12px",borderRadius:8,border:"1px solid #cbd5e1",fontSize:14}}>
+          {MESES.map((m,i)=><option key={i} value={i}>{m}</option>)}
+        </select>
+        <select value={anio} onChange={e=>setAnio(Number(e.target.value))} style={{padding:"6px 12px",borderRadius:8,border:"1px solid #cbd5e1",fontSize:14}}>
+          {[2024,2025,2026,2027].map(y=><option key={y} value={y}>{y}</option>)}
+        </select>
+        <span style={{fontSize:13,color:"#64748b"}}>{activos.filter(p=>pagos[key(p.id)]==="pagado").length}/{activos.length} pagados</span>
+      </div>
+      {activos.map(p=>{
+        const pagado=pagos[key(p.id)]==="pagado";
+        return(
+          <div key={p.id} onClick={()=>toggle(p.id)} style={{display:"flex",alignItems:"center",gap:12,background:pagado?"#f0fdf4":"#fff",border:`1px solid ${pagado?"#86efac":"#e2e8f0"}`,borderRadius:10,padding:"10px 14px",cursor:"pointer",marginBottom:8}}>
+            <div style={{width:22,height:22,borderRadius:"50%",background:pagado?"#16a34a":"#e2e8f0",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>{pagado&&<span style={{color:"#fff",fontSize:12}}>✓</span>}</div>
+            <div style={{flex:1}}>
+              <div style={{fontWeight:600,fontSize:14}}>{p.propiedad}</div>
+              <div style={{fontSize:12,color:"#64748b"}}>{p.inquilino}</div>
+            </div>
+            <div style={{fontWeight:700,color:pagado?"#16a34a":"#2563eb",fontSize:14}}>{fmt(p.cuotaActual)}</div>
+          </div>
+        );
+      })}
+      <div style={{marginTop:8,padding:"12px 16px",background:"#f8fafc",borderRadius:10,display:"flex",justifyContent:"space-between"}}>
+        <span style={{fontWeight:600,color:"#64748b"}}>Total cobrado:</span>
+        <span style={{fontWeight:700,color:"#16a34a",fontSize:16}}>{fmt(activos.filter(p=>pagos[key(p.id)]==="pagado").reduce((s,p)=>s+p.cuotaActual,0))}</span>
+      </div>
+    </div>
+  );
+}
+
+function ChatBot({allProps}){
+  const[msgs,setMsgs]=useState([{role:"assistant",content:"¡Hola! Soy tu asistente de alquileres 🏠 Preguntame por nombre, propiedad, vencimientos, montos... ¡lo que necesites!"}]);
+  const[input,setInput]=useState("");
+  const[loading,setLoading]=useState(false);
+  const bottomRef=useRef(null);
+  useEffect(()=>{bottomRef.current?.scrollIntoView({behavior:"smooth"});},[msgs]);
+  const buildContext=()=>allProps.map(p=>{
+    const estado=getEstado(p);const pa=proximaActualizacion(p.inicio);
+    return`- ${p.propiedad}: inquilino="${p.inquilino||"LIBRE"}", estado=${estado}, inicio=${fmtDate(p.inicio)}, fin=${fmtDate(p.fin)}, cuota=${fmt(p.cuotaActual)}, próx.actualiz=${pa?fmtDateObj(pa):"N/A"}`;
+  }).join("\n");
+  const send=async()=>{
+    const text=input.trim();if(!text||loading)return;
+    const newMsgs=[...msgs,{role:"user",content:text}];
+    setMsgs(newMsgs);setInput("");setLoading(true);
+    try{
+      const res=await fetch("https://api.anthropic.com/v1/messages",{
+        method:"POST",headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,
+          system:`Sos un asistente para una familia que administra alquileres en Argentina. Respondés en español, claro y conciso. Fecha de hoy: 01/06/2026.\n\nPropiedades:\n${buildContext()}`,
+          messages:newMsgs.slice(1).map(m=>({role:m.role,content:m.content}))})
+      });
+      const data=await res.json();
+      setMsgs(m=>[...m,{role:"assistant",content:data.content?.[0]?.text||"No pude responder."}]);
+    }catch(e){setMsgs(m=>[...m,{role:"assistant",content:"Error al conectar."}]);}
+    setLoading(false);
+  };
+  return(
+    <div style={{display:"flex",flexDirection:"column",height:460}}>
+      <div style={{flex:1,overflowY:"auto",display:"flex",flexDirection:"column",gap:10,paddingBottom:8}}>
+        {msgs.map((m,i)=>(
+          <div key={i} style={{display:"flex",justifyContent:m.role==="user"?"flex-end":"flex-start"}}>
+            <div style={{maxWidth:"80%",padding:"10px 14px",borderRadius:m.role==="user"?"12px 12px 2px 12px":"12px 12px 12px 2px",background:m.role==="user"?"#2563eb":"#f1f5f9",color:m.role==="user"?"#fff":"#1e293b",fontSize:14,lineHeight:1.5,whiteSpace:"pre-wrap"}}>{m.content}</div>
+          </div>
+        ))}
+        {loading&&<div style={{display:"flex"}}><div style={{background:"#f1f5f9",borderRadius:"12px 12px 12px 2px",padding:"10px 16px",fontSize:18}}><span style={{animation:"pulse 1s infinite"}}>●</span><span style={{animation:"pulse 1s .2s infinite",margin:"0 3px"}}>●</span><span style={{animation:"pulse 1s .4s infinite"}}>●</span></div></div>}
+        <div ref={bottomRef}/>
+      </div>
+      <div style={{display:"flex",gap:8,marginTop:8}}>
+        <input value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&send()} placeholder="Preguntá por nombre, propiedad, fecha..." style={{flex:1,padding:"10px 14px",borderRadius:10,border:"1px solid #cbd5e1",fontSize:14}}/>
+        <button onClick={send} disabled={loading||!input.trim()} style={{background:"#2563eb",color:"#fff",border:"none",borderRadius:10,padding:"0 18px",fontWeight:700,cursor:"pointer",fontSize:18,opacity:(!input.trim()||loading)?0.5:1}}>↑</button>
+      </div>
+    </div>
+  );
+}
+
+function App(){
+  const[tab,setTab]=useState("direcciones");
+  const[search,setSearch]=useState("");
+  const withEstado=props_data.map(p=>({...p,estado:getEstado(p)}));
+  const activos=withEstado.filter(p=>p.estado==="activo");
+  const libres=withEstado.filter(p=>p.estado==="libre");
+  const vencidos=withEstado.filter(p=>p.estado==="vencido");
+  const porVencer=activos.filter(p=>{const d=diffDays(p.fin);return d!==null&&d<=60;});
+  const totalMensual=activos.reduce((s,p)=>s+p.cuotaActual,0);
+  const filtered=withEstado.filter(p=>p.propiedad.toLowerCase().includes(search.toLowerCase())||p.inquilino.toLowerCase().includes(search.toLowerCase()));
+  const ts=t=>({padding:"8px 12px",borderRadius:8,border:"none",cursor:"pointer",fontWeight:600,fontSize:12,background:tab===t?"#2563eb":"#f1f5f9",color:tab===t?"#fff":"#374151"});
+
+  return(
+    <div style={{maxWidth:900,margin:"0 auto",padding:12}}>
+      <div style={{background:"linear-gradient(135deg,#1e3a8a,#2563eb)",borderRadius:14,padding:"16px 20px",marginBottom:14,color:"#fff"}}>
+        <div style={{fontSize:19,fontWeight:700}}>🏠 Panel de Alquileres</div>
+        <div style={{fontSize:12,opacity:.8,marginTop:2}}>Familia — Junio 2026</div>
+      </div>
+      <div style={{display:"flex",gap:6,marginBottom:14,flexWrap:"wrap"}}>
+        {[["direcciones","📍 Direcciones"],["dashboard","📊 Dashboard"],["propiedades","🏘️ Propiedades"],["pagos","💰 Pagos"],["alertas","🔔 Alertas"],["chat","🤖 Consultas"]].map(([t,l])=>(
+          <button key={t} style={ts(t)} onClick={()=>setTab(t)}>{l}</button>
+        ))}
+      </div>
+
+      {tab==="direcciones"&&(
+        <div>
+          <div style={{fontSize:13,color:"#64748b",marginBottom:10}}>{dirs.length} direcciones · {props_data.length} unidades en total</div>
+          {dirs.map(dir=><DireccionCard key={dir.id} dir={dir} props={withEstado.filter(p=>p.direccionId===dir.id)}/>)}
+        </div>
+      )}
+
+      {tab==="dashboard"&&(
+        <div>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(120px,1fr))",gap:10,marginBottom:14}}>
+            {[[props_data.length,"Total","#2563eb","🏠"],[activos.length,"Activos","#16a34a","🟢"],[libres.length,"Libres","#6b7280","🔘"],[vencidos.length,"Vencidos","#dc2626","🔴"],[porVencer.length,"Por vencer","#d97706","🟡"]].map(([val,label,color,icon])=>(
+              <div key={label} style={{background:"#fff",borderRadius:10,padding:"12px 14px",boxShadow:"0 1px 4px rgba(0,0,0,.08)"}}>
+                <div style={{fontSize:20}}>{icon}</div>
+                <div style={{fontSize:22,fontWeight:700,color,marginTop:4}}>{val}</div>
+                <div style={{fontSize:11,color:"#64748b",marginTop:2}}>{label}</div>
+              </div>
+            ))}
+          </div>
+          <div style={{background:"#fff",borderRadius:10,padding:14,boxShadow:"0 1px 4px rgba(0,0,0,.08)",marginBottom:12}}>
+            <div style={{fontSize:12,color:"#64748b",marginBottom:4}}>💵 Recaudación mensual estimada</div>
+            <div style={{fontSize:26,fontWeight:700,color:"#16a34a"}}>{fmt(totalMensual)}</div>
+          </div>
+          <div style={{background:"#fff",borderRadius:10,padding:14,boxShadow:"0 1px 4px rgba(0,0,0,.08)"}}>
+            <div style={{fontWeight:600,marginBottom:10,fontSize:14}}>Resumen por dirección</div>
+            {dirs.map(dir=>{
+              const dp=withEstado.filter(p=>p.direccionId===dir.id);
+              const da=dp.filter(p=>p.estado==="activo");
+              return(
+                <div key={dir.id} style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"8px 0",borderBottom:"1px solid #f1f5f9"}}>
+                  <div>
+                    <span style={{fontWeight:600,fontSize:13}}>📍 {dir.nombre}</span>
+                    <span style={{fontSize:12,color:"#94a3b8",marginLeft:8}}>{dp.length} unidades</span>
+                  </div>
+                  <span style={{fontWeight:700,color:"#16a34a",fontSize:13}}>{fmt(da.reduce((s,p)=>s+p.cuotaActual,0))}/mes</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {tab==="propiedades"&&(
+        <div>
+          <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="🔍 Buscar propiedad o inquilino..." style={{width:"100%",padding:"9px 14px",borderRadius:8,border:"1px solid #cbd5e1",fontSize:14,marginBottom:12}}/>
+          {filtered.map(p=>{
+            const days=diffDays(p.fin);const pa=proximaActualizacion(p.inicio);
+            const dir=dirs.find(d=>d.id===p.direccionId);
+            let bg="#fff";
+            if(p.estado==="vencido")bg="#fef2f2";
+            else if(p.estado==="libre")bg="#f8fafc";
+            else if(days!==null&&days<=60)bg="#fffbeb";
+            return(
+              <div key={p.id} style={{background:bg,border:"1px solid #e2e8f0",borderRadius:10,padding:"11px 13px",marginBottom:8}}>
+                <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:5,flexWrap:"wrap",gap:5}}>
+                  <span style={{fontWeight:700,fontSize:14}}>{p.propiedad}</span>
+                  <div style={{display:"flex",gap:5,flexWrap:"wrap",alignItems:"center"}}>
+                    {dir&&<span style={{fontSize:10,color:"#64748b",background:"#f1f5f9",borderRadius:5,padding:"2px 6px"}}>📍{dir.nombre}</span>}
+                    <StatusBadge estado={p.estado} fin={p.fin}/>
+                  </div>
+                </div>
+                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"2px 10px",fontSize:12,color:"#64748b"}}>
+                  <span>👤 {p.inquilino||"Sin inquilino"}</span>
+                  <span>💵 {fmt(p.cuotaActual)}</span>
+                  <span>📅 Inicio: {fmtDate(p.inicio)}</span>
+                  <span>📅 Fin: {fmtDate(p.fin)}</span>
+                  {p.inicio&&<span>🔄 Próx: {pa?fmtDateObj(pa):"—"}</span>}
+                  {p.notas&&<span>📝 {p.notas}</span>}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {tab==="pagos"&&<PagosView props={withEstado}/>}
+
+      {tab==="alertas"&&(
+        <div style={{display:"flex",flexDirection:"column",gap:10}}>
+          {vencidos.length>0&&<div style={{background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:10,padding:14}}>
+            <div style={{fontWeight:700,color:"#dc2626",marginBottom:8}}>🔴 Contratos vencidos ({vencidos.length})</div>
+            {vencidos.map(p=><div key={p.id} style={{fontSize:13,color:"#7f1d1d",padding:"4px 0",borderBottom:"1px solid #fee2e2"}}><strong>{p.propiedad}</strong> — {p.inquilino} — venció {fmtDate(p.fin)}</div>)}
+          </div>}
+          {porVencer.length>0&&<div style={{background:"#fffbeb",border:"1px solid #fcd34d",borderRadius:10,padding:14}}>
+            <div style={{fontWeight:700,color:"#d97706",marginBottom:8}}>🟡 Vencen en 60 días ({porVencer.length})</div>
+            {porVencer.map(p=><div key={p.id} style={{fontSize:13,color:"#92400e",padding:"4px 0"}}><strong>{p.propiedad}</strong> — {p.inquilino} — {fmtDate(p.fin)} ({diffDays(p.fin)}d)</div>)}
+          </div>}
+          {libres.length>0&&<div style={{background:"#f8fafc",border:"1px solid #cbd5e1",borderRadius:10,padding:14}}>
+            <div style={{fontWeight:700,color:"#475569",marginBottom:8}}>🔘 Libres ({libres.length})</div>
+            {libres.map(p=><div key={p.id} style={{fontSize:13,color:"#64748b",padding:"4px 0"}}><strong>{p.propiedad}</strong>{p.responsable?` — ${p.responsable}`:""}</div>)}
+          </div>}
+          {(()=>{
+            const prox=activos.filter(p=>{const pa=proximaActualizacion(p.inicio);if(!pa)return false;return Math.ceil((pa-today)/(864e5))<=45;});
+            return prox.length>0&&<div style={{background:"#eff6ff",border:"1px solid #93c5fd",borderRadius:10,padding:14}}>
+              <div style={{fontWeight:700,color:"#1d4ed8",marginBottom:8}}>🔄 Actualizaciones próximas ({prox.length})</div>
+              {prox.map(p=>{const pa=proximaActualizacion(p.inicio);return<div key={p.id} style={{fontSize:13,color:"#1e40af",padding:"4px 0"}}><strong>{p.propiedad}</strong> — {p.inquilino} — {fmtDateObj(pa)}</div>;})}
+            </div>;
+          })()}
+        </div>
+      )}
+
+      {tab==="chat"&&(
+        <div style={{background:"#fff",borderRadius:10,padding:14,boxShadow:"0 1px 4px rgba(0,0,0,.08)"}}>
+          <div style={{fontWeight:700,fontSize:15,marginBottom:12}}>🤖 Asistente de consultas</div>
+          <ChatBot allProps={withEstado}/>
+        </div>
+      )}
+    </div>
+  );
+}
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
