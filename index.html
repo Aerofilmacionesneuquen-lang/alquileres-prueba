@@ -22,7 +22,6 @@ input,select,button{font-family:inherit}
 </style>
 </head>
 <body>
-<div class="banner">👁️ Modo solo lectura — Para modificaciones contactar al administrador</div>
 <div id="root"></div>
 <script type="text/babel">
 const{useState,useRef,useEffect}=React;
@@ -43,7 +42,7 @@ const dirs=[
 ];
 
 const props_data=[
-  {id:1, propiedad:"LOCAL 1",    inquilino:"TOLA",                inicio:"2026-03-01",inicial:98000, cuotaActual:1014075,cuotas:29,mesActualizacion:"Junio", telefono:"",dni:"",email:"",notas:"",    direccionId:1},
+  {id:1, propiedad:"LOCAL 1",    inquilino:"TOLA",                inicio:"2026-03-01",inicial:98000, cuotaActual:1014075,cuotas:29,mesActualizacion:"Junio", telefono:"2994 22-3443",dni:"95329964",email:"",notas:"",    direccionId:1},
   {id:2, propiedad:"LOCAL 2",    inquilino:"",                    inicio:"2022-05-01",inicial:0,     cuotaActual:0,      cuotas:0, mesActualizacion:"",      telefono:"",dni:"",email:"",notas:"",    direccionId:1},
   {id:3, propiedad:'P. ALT "A"', inquilino:"",                    inicio:"2025-04-13",inicial:0,     cuotaActual:0,      cuotas:13,mesActualizacion:"",      telefono:"",dni:"",email:"",notas:"icl", direccionId:1},
   {id:4, propiedad:'P. ALT "B"', inquilino:"",                    inicio:"2022-09-01",inicial:0,     cuotaActual:0,      cuotas:0, mesActualizacion:"",      telefono:"",dni:"",email:"",notas:"",    direccionId:1},
@@ -227,6 +226,42 @@ function ICLCalculator({props}){
   );
 }
 
+const PASSWORD="dimar3182";
+
+function Login({onOk}){
+  const[pass,setPass]=useState("");
+  const[error,setError]=useState(false);
+  const intentar=()=>{
+    if(pass===PASSWORD){onOk();}
+    else{setError(true);setPass("");}
+  };
+  return(
+    <div style={{minHeight:"100vh",background:"linear-gradient(135deg,#1e3a8a,#2563eb)",display:"flex",alignItems:"center",justifyContent:"center",padding:16}}>
+      <div style={{background:"#fff",borderRadius:16,padding:32,width:320,maxWidth:"95vw",boxShadow:"0 20px 60px rgba(0,0,0,.3)",textAlign:"center"}}>
+        <div style={{fontSize:48,marginBottom:8}}>🏠</div>
+        <div style={{fontSize:20,fontWeight:700,color:"#1e293b",marginBottom:4}}>Panel de Alquileres</div>
+        <div style={{fontSize:13,color:"#64748b",marginBottom:24}}>Familia · Acceso privado</div>
+        <input
+          type="password"
+          value={pass}
+          onChange={e=>{setPass(e.target.value);setError(false);}}
+          onKeyDown={e=>e.key==="Enter"&&intentar()}
+          placeholder="Contraseña"
+          style={{width:"100%",padding:"10px 14px",border:`1px solid ${error?"#dc2626":"#cbd5e1"}`,borderRadius:8,fontSize:15,marginBottom:8,boxSizing:"border-box",textAlign:"center",letterSpacing:4}}
+        />
+        {error&&<div style={{color:"#dc2626",fontSize:13,marginBottom:8}}>Contraseña incorrecta</div>}
+        <button onClick={intentar} style={{width:"100%",background:"#2563eb",color:"#fff",border:"none",borderRadius:8,padding:"10px 0",fontWeight:700,cursor:"pointer",fontSize:15}}>Entrar</button>
+      </div>
+    </div>
+  );
+}
+
+function AppConLogin(){
+  const[ok,setOk]=useState(false);
+  if(!ok)return <Login onOk={()=>setOk(true)}/>;
+  return <App/>;
+}
+
 function App(){
   const[tab,setTab]=useState("direcciones");
   const[search,setSearch]=useState("");
@@ -375,7 +410,7 @@ function App(){
     </div>
   );
 }
-ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+ReactDOM.createRoot(document.getElementById("root")).render(<AppConLogin/>);
 </script>
 </body>
 </html>
