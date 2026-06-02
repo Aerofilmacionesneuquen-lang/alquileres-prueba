@@ -17,7 +17,6 @@
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:system-ui,sans-serif;background:#f8fafc}
 input,select,button{font-family:inherit}
-.banner{background:#1e3a8a;color:#fff;text-align:center;padding:7px;font-size:12px;letter-spacing:.3px}
 @keyframes pulse{0%,100%{opacity:.3}50%{opacity:1}}
 </style>
 </head>
@@ -27,6 +26,7 @@ input,select,button{font-family:inherit}
 const{useState,useRef,useEffect}=React;
 const MESES=["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
 const today=new Date(2026,5,1);
+const PASSWORD="dimar3182";
 
 function addYear(d){if(!d)return null;const dt=new Date(d);dt.setFullYear(dt.getFullYear()+1);return dt.toISOString().slice(0,10);}
 function proximaActualizacion(inicio){if(!inicio)return null;let d=new Date(inicio);while(d<=today)d.setMonth(d.getMonth()+3);return d;}
@@ -36,15 +36,35 @@ function fmt(n){return n?"$"+n.toLocaleString("es-AR"):"-";}
 function fmtDate(d){if(!d)return"-";const[y,m,day]=d.split("-");return`${day}/${m}/${y}`;}
 function fmtDateObj(d){if(!d)return"-";return`${String(d.getDate()).padStart(2,"0")}/${String(d.getMonth()+1).padStart(2,"0")}/${d.getFullYear()}`;}
 
+// v21 - Historial cargado: Ene/Feb/Mar/Abr/May 2026 + Dic 2025
+const historialMontos={
+  1: {'2025-11':750000,'2026-0':750000,'2026-1':750000,'2026-2':1014075,'2026-3':1014075,'2026-4':1014075,'2026-5':1014075},
+  2: {'2025-11':954053,'2026-0':954053,'2026-1':954053,'2026-2':1014075},
+  3: {'2025-11':617207,'2026-0':617207,'2026-1':617207,'2026-2':617207},
+  5: {'2025-11':565021,'2026-0':565021,'2026-1':565021,'2026-2':623253,'2026-3':623253,'2026-4':623253,'2026-5':623253},
+  6: {'2025-11':643675,'2026-0':643675,'2026-1':643675,'2026-2':643645,'2026-3':890000,'2026-4':890000,'2026-5':890000},
+  7: {'2025-11':0,'2026-0':0,'2026-1':0,'2026-2':950000,'2026-3':950000,'2026-4':950000,'2026-5':950000},
+  8: {'2025-11':685000,'2026-0':685000,'2026-1':890000,'2026-2':890000,'2026-3':890000,'2026-4':890000,'2026-5':890000},
+  9: {'2025-11':860000,'2026-0':860000,'2026-1':860000,'2026-2':912000,'2026-3':912000,'2026-4':912000,'2026-5':912000},
+  10:{'2025-11':680000,'2026-0':680000,'2026-1':680000,'2026-2':680000,'2026-3':680000,'2026-4':680000,'2026-5':680000},
+};
+const historialInquilinos={
+  2: {'2025-11':'AMALIA QUISPE','2026-0':'AMALIA QUISPE','2026-1':'AMALIA QUISPE','2026-2':'AMALIA QUISPE'},
+  3: {'2025-11':'AGUSTINA ERICES','2026-0':'AGUSTINA ERICES','2026-1':'AGUSTINA ERICES','2026-2':'AGUSTINA ERICES'},
+  6: {'2025-11':'FRANCO TRECAMAN','2026-0':'FRANCO TRECAMAN','2026-1':'FRANCO TRECAMAN','2026-2':'FRANCO TRECAMAN','2026-3':'NEYEN VAVRIK','2026-4':'NEYEN VAVRIK','2026-5':'NEYEN VAVRIK'},
+  7: {'2025-11':'AGUSTINA RETAMAL','2026-0':'AGUSTINA RETAMAL','2026-1':'AGUSTINA RETAMAL','2026-2':'ACUÑA B MIGUEL HIJO','2026-3':'ACUÑA B MIGUEL HIJO','2026-4':'ACUÑA B MIGUEL HIJO','2026-5':'ACUÑA B MIGUEL HIJO'},
+  8: {'2025-11':'FERNANDA','2026-0':'FERNANDA','2026-1':'CENTENO GASTON','2026-2':'CENTENO GASTON','2026-3':'CENTENO GASTON','2026-4':'CENTENO GASTON','2026-5':'CENTENO GASTON'},
+};
+
 const dirs=[
-  {id:1,nombre:"Blumetti 180",  ciudad:"Cinco Saltos",notas:"2 locales + 10 departamentos"},
+  {id:1,nombre:"Blumetti 180",  ciudad:"Cinco Saltos",  notas:"2 locales + 10 departamentos"},
   {id:2,nombre:"Complejo Dimar",ciudad:"Rafael Calzada",notas:"23 departamentos"},
 ];
 
 const props_data=[
   {id:1, propiedad:"LOCAL 1",    inquilino:"TOLA",                inicio:"2026-03-01",inicial:98000, cuotaActual:1014075,cuotas:29,mesActualizacion:"Junio", telefono:"2994 22-3443",dni:"95329964",email:"",notas:"",    direccionId:1},
-  {id:2, propiedad:"LOCAL 2",    inquilino:"",                    inicio:"2022-05-01",inicial:0,     cuotaActual:0,      cuotas:0, mesActualizacion:"",      telefono:"",dni:"",email:"",notas:"",    direccionId:1},
-  {id:3, propiedad:'P. ALT "A"', inquilino:"",                    inicio:"2025-04-13",inicial:0,     cuotaActual:0,      cuotas:13,mesActualizacion:"",      telefono:"",dni:"",email:"",notas:"icl", direccionId:1},
+  {id:2, propiedad:"LOCAL 2",    inquilino:"",                    inicio:"2022-05-01",inicial:98000, cuotaActual:0,      cuotas:0, mesActualizacion:"Junio", telefono:"",dni:"",email:"",notas:"Último: AMALIA QUISPE - venció 01/05/25",direccionId:1},
+  {id:3, propiedad:'P. ALT "A"', inquilino:"",                    inicio:"2025-04-13",inicial:520000,cuotaActual:617207, cuotas:13,mesActualizacion:"Abril", telefono:"",dni:"",email:"",notas:"Último: AGUSTINA ERICES - venció 12/04/26",direccionId:1},
   {id:4, propiedad:'P. ALT "B"', inquilino:"",                    inicio:"2022-09-01",inicial:0,     cuotaActual:0,      cuotas:0, mesActualizacion:"",      telefono:"",dni:"",email:"",notas:"",    direccionId:1},
   {id:5, propiedad:'P. ALT "C"', inquilino:"LUZ MARIA VALDEZ",   inicio:"2025-07-01",inicial:530000,cuotaActual:623253, cuotas:10,mesActualizacion:"Julio", telefono:"",dni:"",email:"",notas:"",    direccionId:1},
   {id:6, propiedad:'P. ALT "D"', inquilino:"NEYEN VAVRIK",       inicio:"2026-04-01",inicial:890000,cuotaActual:890000, cuotas:1, mesActualizacion:"Julio", telefono:"",dni:"",email:"",notas:"icl", direccionId:1},
@@ -69,6 +89,25 @@ function StatusBadge({estado,fin}){
   else if(days!==null&&days<=60){color="#d97706";label=`🟡 ${days}d`;}
   else{color="#16a34a";label="🟢 Activo";}
   return <span style={{background:color,color:"#fff",borderRadius:12,padding:"2px 10px",fontSize:11,fontWeight:600,whiteSpace:"nowrap"}}>{label}</span>;
+}
+
+function Login({onOk}){
+  const[pass,setPass]=useState("");
+  const[error,setError]=useState(false);
+  const intentar=()=>{if(pass===PASSWORD)onOk();else{setError(true);setPass("");}};
+  return(
+    <div style={{minHeight:"100vh",background:"linear-gradient(135deg,#1e3a8a,#2563eb)",display:"flex",alignItems:"center",justifyContent:"center",padding:16}}>
+      <div style={{background:"#fff",borderRadius:16,padding:32,width:320,maxWidth:"95vw",boxShadow:"0 20px 60px rgba(0,0,0,.3)",textAlign:"center"}}>
+        <div style={{fontSize:48,marginBottom:8}}>🏠</div>
+        <div style={{fontSize:20,fontWeight:700,color:"#1e293b",marginBottom:4}}>Panel de Alquileres</div>
+        <div style={{fontSize:13,color:"#64748b",marginBottom:24}}>Familia · Acceso privado</div>
+        <input type="password" value={pass} onChange={e=>{setPass(e.target.value);setError(false);}} onKeyDown={e=>e.key==="Enter"&&intentar()} placeholder="Contraseña"
+          style={{width:"100%",padding:"10px 14px",border:`1px solid ${error?"#dc2626":"#cbd5e1"}`,borderRadius:8,fontSize:15,marginBottom:8,boxSizing:"border-box",textAlign:"center",letterSpacing:4}}/>
+        {error&&<div style={{color:"#dc2626",fontSize:13,marginBottom:8}}>Contraseña incorrecta</div>}
+        <button onClick={intentar} style={{width:"100%",background:"#2563eb",color:"#fff",border:"none",borderRadius:8,padding:"10px 0",fontWeight:700,cursor:"pointer",fontSize:15}}>Entrar</button>
+      </div>
+    </div>
+  );
 }
 
 function DireccionCard({dir,props}){
@@ -115,153 +154,6 @@ function DireccionCard({dir,props}){
   );
 }
 
-function PagosView({props}){
-  const[mes,setMes]=useState(5);
-  const[anio,setAnio]=useState(2026);
-  const[historial,setHistorial]=useState({});
-  const key=(id,m,a)=>`${a}-${m}-${id}`;
-  const toggle=id=>{const k=key(id,mes,anio);setHistorial(h=>({...h,[k]:h[k]==="pagado"?"pendiente":"pagado"}));};
-  const activos=props.filter(p=>getEstado(p)==="activo");
-  const pagados=activos.filter(p=>historial[key(p.id,mes,anio)]==="pagado");
-  const mesesAnteriores=[];
-  for(let i=1;i<=3;i++){
-    let m=mes-i;let a=anio;
-    if(m<0){m+=12;a--;}
-    const pag=activos.filter(p=>historial[key(p.id,m,a)]==="pagado");
-    if(pag.length>0)mesesAnteriores.push({mes:m,anio:a,count:pag.length,total:pag.reduce((s,p)=>s+p.cuotaActual,0)});
-  }
-  return(
-    <div>
-      <div style={{display:"flex",gap:10,alignItems:"center",marginBottom:14,flexWrap:"wrap"}}>
-        <select value={mes} onChange={e=>setMes(Number(e.target.value))} style={{padding:"6px 12px",borderRadius:8,border:"1px solid #cbd5e1",fontSize:14}}>
-          {MESES.map((m,i)=><option key={i} value={i}>{m}</option>)}
-        </select>
-        <select value={anio} onChange={e=>setAnio(Number(e.target.value))} style={{padding:"6px 12px",borderRadius:8,border:"1px solid #cbd5e1",fontSize:14}}>
-          {[2024,2025,2026,2027].map(y=><option key={y} value={y}>{y}</option>)}
-        </select>
-        <span style={{fontSize:13,color:"#64748b"}}>{pagados.length}/{activos.length} pagados</span>
-      </div>
-      <div style={{background:"#e2e8f0",borderRadius:8,height:8,marginBottom:14,overflow:"hidden"}}>
-        <div style={{background:"#16a34a",height:"100%",width:`${activos.length?pagados.length/activos.length*100:0}%`,transition:"width .3s",borderRadius:8}}/>
-      </div>
-      {activos.map(p=>{
-        const pagado=historial[key(p.id,mes,anio)]==="pagado";
-        return(
-          <div key={p.id} onClick={()=>toggle(p.id)} style={{display:"flex",alignItems:"center",gap:12,background:pagado?"#f0fdf4":"#fff",border:`1px solid ${pagado?"#86efac":"#e2e8f0"}`,borderRadius:10,padding:"10px 14px",cursor:"pointer",marginBottom:7,transition:"all .15s"}}>
-            <div style={{width:24,height:24,borderRadius:"50%",background:pagado?"#16a34a":"#e2e8f0",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
-              {pagado&&<span style={{color:"#fff",fontSize:13}}>✓</span>}
-            </div>
-            <div style={{flex:1}}>
-              <div style={{fontWeight:600,fontSize:14}}>{p.propiedad}</div>
-              <div style={{fontSize:12,color:"#64748b"}}>{p.inquilino}{p.telefono?` · 📞${p.telefono}`:""}</div>
-            </div>
-            <div style={{textAlign:"right"}}>
-              <div style={{fontWeight:700,color:pagado?"#16a34a":"#2563eb",fontSize:14}}>{fmt(p.cuotaActual)}</div>
-              {pagado&&<div style={{fontSize:10,color:"#16a34a"}}>✓ cobrado</div>}
-            </div>
-          </div>
-        );
-      })}
-      <div style={{marginTop:8,padding:"12px 16px",background:"#f8fafc",borderRadius:10,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-        <div>
-          <div style={{fontWeight:600,color:"#64748b",fontSize:13}}>Total cobrado</div>
-          <div style={{fontSize:11,color:"#94a3b8"}}>{MESES[mes]} {anio}</div>
-        </div>
-        <span style={{fontWeight:700,color:"#16a34a",fontSize:18}}>{fmt(pagados.reduce((s,p)=>s+p.cuotaActual,0))}</span>
-      </div>
-      {mesesAnteriores.length>0&&(
-        <div style={{marginTop:10,padding:"10px 14px",background:"#fff",borderRadius:10,border:"1px solid #e2e8f0"}}>
-          <div style={{fontSize:12,fontWeight:600,color:"#64748b",marginBottom:6}}>📋 Historial reciente</div>
-          {mesesAnteriores.map(({mes:m,anio:a,count,total})=>(
-            <div key={`${m}-${a}`} style={{display:"flex",justifyContent:"space-between",fontSize:12,color:"#475569",padding:"3px 0",borderBottom:"1px solid #f1f5f9"}}>
-              <span>{MESES[m]} {a} — {count} pagos</span>
-              <span style={{fontWeight:600,color:"#16a34a"}}>{fmt(total)}</span>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
-
-function ICLCalculator({props}){
-  const[icl,setIcl]=useState(10);
-  const proximas=props.filter(p=>{
-    const pa=proximaActualizacion(p.inicio);
-    if(!pa)return false;
-    return Math.ceil((pa-today)/(864e5))<=90;
-  });
-  return(
-    <div style={{background:"#eff6ff",border:"1px solid #93c5fd",borderRadius:10,padding:14}}>
-      <div style={{fontWeight:700,color:"#1d4ed8",marginBottom:10,fontSize:14}}>📈 Calculadora de actualización ICL</div>
-      <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12,flexWrap:"wrap"}}>
-        <label style={{fontSize:13,color:"#1d4ed8"}}>% de aumento:</label>
-        <input type="number" value={icl} onChange={e=>setIcl(Number(e.target.value))}
-          style={{width:70,padding:"5px 8px",border:"1px solid #93c5fd",borderRadius:6,fontSize:14,fontWeight:700,color:"#1d4ed8",textAlign:"center"}}/>
-        <span style={{fontSize:13,color:"#64748b"}}>próximas actualizaciones (90 días)</span>
-      </div>
-      {proximas.length===0&&<div style={{fontSize:13,color:"#64748b"}}>No hay actualizaciones en los próximos 90 días.</div>}
-      {proximas.map(p=>{
-        const pa=proximaActualizacion(p.inicio);
-        const nuevo=Math.round(p.cuotaActual*(1+icl/100));
-        const diff=nuevo-p.cuotaActual;
-        return(
-          <div key={p.id} style={{background:"#fff",borderRadius:8,padding:"10px 12px",marginBottom:8,border:"1px solid #bfdbfe"}}>
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:4}}>
-              <div>
-                <span style={{fontWeight:700,fontSize:13}}>{p.propiedad}</span>
-                <span style={{fontSize:12,color:"#64748b",marginLeft:8}}>{p.inquilino}</span>
-              </div>
-              <span style={{fontSize:12,color:"#64748b"}}>📅 {fmtDateObj(pa)}</span>
-            </div>
-            <div style={{display:"flex",gap:12,marginTop:6,fontSize:13,flexWrap:"wrap"}}>
-              <span style={{color:"#64748b"}}>Actual: <strong>{fmt(p.cuotaActual)}</strong></span>
-              <span style={{color:"#16a34a"}}>→ Nuevo: <strong>{fmt(nuevo)}</strong></span>
-              <span style={{color:"#2563eb"}}>+{fmt(diff)}</span>
-            </div>
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
-const PASSWORD="dimar3182";
-
-function Login({onOk}){
-  const[pass,setPass]=useState("");
-  const[error,setError]=useState(false);
-  const intentar=()=>{
-    if(pass===PASSWORD){onOk();}
-    else{setError(true);setPass("");}
-  };
-  return(
-    <div style={{minHeight:"100vh",background:"linear-gradient(135deg,#1e3a8a,#2563eb)",display:"flex",alignItems:"center",justifyContent:"center",padding:16}}>
-      <div style={{background:"#fff",borderRadius:16,padding:32,width:320,maxWidth:"95vw",boxShadow:"0 20px 60px rgba(0,0,0,.3)",textAlign:"center"}}>
-        <div style={{fontSize:48,marginBottom:8}}>🏠</div>
-        <div style={{fontSize:20,fontWeight:700,color:"#1e293b",marginBottom:4}}>Panel de Alquileres</div>
-        <div style={{fontSize:13,color:"#64748b",marginBottom:24}}>Familia · Acceso privado</div>
-        <input
-          type="password"
-          value={pass}
-          onChange={e=>{setPass(e.target.value);setError(false);}}
-          onKeyDown={e=>e.key==="Enter"&&intentar()}
-          placeholder="Contraseña"
-          style={{width:"100%",padding:"10px 14px",border:`1px solid ${error?"#dc2626":"#cbd5e1"}`,borderRadius:8,fontSize:15,marginBottom:8,boxSizing:"border-box",textAlign:"center",letterSpacing:4}}
-        />
-        {error&&<div style={{color:"#dc2626",fontSize:13,marginBottom:8}}>Contraseña incorrecta</div>}
-        <button onClick={intentar} style={{width:"100%",background:"#2563eb",color:"#fff",border:"none",borderRadius:8,padding:"10px 0",fontWeight:700,cursor:"pointer",fontSize:15}}>Entrar</button>
-      </div>
-    </div>
-  );
-}
-
-function AppConLogin(){
-  const[ok,setOk]=useState(false);
-  if(!ok)return <Login onOk={()=>setOk(true)}/>;
-  return <App/>;
-}
-
 function DirPropCard({dir,props}){
   const[abierta,setAbierta]=useState(false);
   const actDir=props.filter(p=>getEstado(p)==="activo");
@@ -300,10 +192,133 @@ function DirPropCard({dir,props}){
                   {p.dni&&<span>🪪 {p.dni}</span>}
                   <span>📅 Fin: {fmtDate(p.fin)}</span>
                   {p.inicio&&<span>🔄 Próx: {pa?fmtDateObj(pa):"—"}</span>}
+                  {p.notas&&<span style={{gridColumn:"1/-1"}}>📝 {p.notas}</span>}
                 </div>
               </div>
             );
           })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ICLCalculator({props}){
+  const[icl,setIcl]=useState(10);
+  const proximas=props.filter(p=>{const pa=proximaActualizacion(p.inicio);if(!pa)return false;return Math.ceil((pa-today)/(864e5))<=90;});
+  return(
+    <div style={{background:"#eff6ff",border:"1px solid #93c5fd",borderRadius:10,padding:14}}>
+      <div style={{fontWeight:700,color:"#1d4ed8",marginBottom:10,fontSize:14}}>📈 Calculadora de actualización ICL</div>
+      <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12,flexWrap:"wrap"}}>
+        <label style={{fontSize:13,color:"#1d4ed8"}}>% de aumento:</label>
+        <input type="number" value={icl} onChange={e=>setIcl(Number(e.target.value))} style={{width:70,padding:"5px 8px",border:"1px solid #93c5fd",borderRadius:6,fontSize:14,fontWeight:700,color:"#1d4ed8",textAlign:"center"}}/>
+      </div>
+      {proximas.length===0&&<div style={{fontSize:13,color:"#64748b"}}>No hay actualizaciones en los próximos 90 días.</div>}
+      {proximas.map(p=>{
+        const pa=proximaActualizacion(p.inicio);
+        const nuevo=Math.round(p.cuotaActual*(1+icl/100));
+        return(
+          <div key={p.id} style={{background:"#fff",borderRadius:8,padding:"10px 12px",marginBottom:8,border:"1px solid #bfdbfe"}}>
+            <div style={{display:"flex",justifyContent:"space-between",flexWrap:"wrap",gap:4}}>
+              <span style={{fontWeight:700,fontSize:13}}>{p.propiedad} — {p.inquilino}</span>
+              <span style={{fontSize:12,color:"#64748b"}}>📅 {fmtDateObj(pa)}</span>
+            </div>
+            <div style={{display:"flex",gap:12,marginTop:6,fontSize:13,flexWrap:"wrap"}}>
+              <span style={{color:"#64748b"}}>Actual: <strong>{fmt(p.cuotaActual)}</strong></span>
+              <span style={{color:"#16a34a"}}>→ Nuevo: <strong>{fmt(nuevo)}</strong></span>
+              <span style={{color:"#2563eb"}}>+{fmt(nuevo-p.cuotaActual)}</span>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function PagosView({props}){
+  const[mes,setMes]=useState(5);
+  const[anio,setAnio]=useState(2026);
+  const[pagos,setPagos]=useState({});
+  const pk=(id,m,a)=>`${a}-${m}-${id}`;
+  const toggle=id=>setPagos(p=>({...p,[pk(id,mes,anio)]:p[pk(id,mes,anio)]==="pagado"?"pendiente":"pagado"}));
+  const getEntradas=(m,a)=>{
+    const mk=`${a}-${m}`;
+    return props.reduce((acc,p)=>{
+      let monto,inq;
+      if(historialMontos[p.id]&&historialMontos[p.id][mk]!==undefined){
+        monto=historialMontos[p.id][mk];
+        inq=historialInquilinos[p.id]?.[mk]||p.inquilino;
+      } else {
+        monto=getEstado(p)==="activo"?p.cuotaActual:0;
+        inq=p.inquilino;
+      }
+      if(monto>0&&inq)acc.push({...p,cuotaActual:monto,inquilino:inq});
+      return acc;
+    },[]);
+  };
+  const entradas=getEntradas(mes,anio);
+  const pagados=entradas.filter(e=>pagos[pk(e.id,mes,anio)]==="pagado");
+  const mesesAnteriores=[];
+  for(let i=1;i<=3;i++){
+    let m=mes-i,a=anio;if(m<0){m+=12;a--;}
+    const ent=getEntradas(m,a);
+    const pag=ent.filter(e=>pagos[pk(e.id,m,a)]==="pagado");
+    if(pag.length>0)mesesAnteriores.push({mes:m,anio:a,count:pag.length,total:pag.reduce((s,e)=>s+e.cuotaActual,0)});
+  }
+  return(
+    <div>
+      <div style={{display:"flex",gap:10,alignItems:"center",marginBottom:14,flexWrap:"wrap"}}>
+        <select value={mes} onChange={e=>setMes(Number(e.target.value))} style={{padding:"6px 12px",borderRadius:8,border:"1px solid #cbd5e1",fontSize:14}}>
+          {MESES.map((m,i)=><option key={i} value={i}>{m}</option>)}
+        </select>
+        <select value={anio} onChange={e=>setAnio(Number(e.target.value))} style={{padding:"6px 12px",borderRadius:8,border:"1px solid #cbd5e1",fontSize:14}}>
+          {[2024,2025,2026,2027].map(y=><option key={y} value={y}>{y}</option>)}
+        </select>
+        <span style={{fontSize:13,color:"#64748b"}}>{pagados.length}/{entradas.length} pagados</span>
+      </div>
+      <div style={{background:"#e2e8f0",borderRadius:8,height:8,marginBottom:14,overflow:"hidden"}}>
+        <div style={{background:"#16a34a",height:"100%",width:`${entradas.length?pagados.length/entradas.length*100:0}%`,transition:"width .3s",borderRadius:8}}/>
+      </div>
+      {entradas.map(e=>{
+        const pagado=pagos[pk(e.id,mes,anio)]==="pagado";
+        return(
+          <div key={e.id} onClick={()=>toggle(e.id)} style={{display:"flex",alignItems:"center",gap:12,background:pagado?"#f0fdf4":"#fff",border:`1px solid ${pagado?"#86efac":"#e2e8f0"}`,borderRadius:10,padding:"10px 14px",cursor:"pointer",marginBottom:7,transition:"all .15s"}}>
+            <div style={{width:24,height:24,borderRadius:"50%",background:pagado?"#16a34a":"#e2e8f0",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+              {pagado&&<span style={{color:"#fff",fontSize:13}}>✓</span>}
+            </div>
+            <div style={{flex:1}}>
+              <div style={{fontWeight:600,fontSize:14}}>{e.propiedad}</div>
+              <div style={{fontSize:12,color:"#64748b"}}>{e.inquilino}{e.telefono?` · 📞${e.telefono}`:""}</div>
+            </div>
+            <div style={{textAlign:"right"}}>
+              <div style={{fontWeight:700,color:pagado?"#16a34a":"#2563eb",fontSize:14}}>{fmt(e.cuotaActual)}</div>
+              {pagado&&<div style={{fontSize:10,color:"#16a34a"}}>✓ cobrado</div>}
+            </div>
+          </div>
+        );
+      })}
+      <div style={{marginTop:8,padding:"14px 16px",background:"#f8fafc",borderRadius:10}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}>
+          <div>
+            <div style={{fontWeight:700,color:"#1e293b",fontSize:14}}>Total del mes</div>
+            <div style={{fontSize:11,color:"#94a3b8"}}>{MESES[mes]} {anio} — {entradas.length} propiedades</div>
+          </div>
+          <span style={{fontWeight:700,color:"#2563eb",fontSize:20}}>{fmt(entradas.reduce((s,e)=>s+e.cuotaActual,0))}</span>
+        </div>
+        <div style={{display:"flex",justifyContent:"space-between",fontSize:12,color:"#64748b",paddingTop:6,borderTop:"1px solid #e2e8f0"}}>
+          <span>✅ Cobrado: <strong style={{color:"#16a34a"}}>{fmt(pagados.reduce((s,e)=>s+e.cuotaActual,0))}</strong> ({pagados.length})</span>
+          <span>⏳ Pendiente: <strong style={{color:"#d97706"}}>{fmt(entradas.filter(e=>pagos[pk(e.id,mes,anio)]!=="pagado").reduce((s,e)=>s+e.cuotaActual,0))}</strong></span>
+        </div>
+      </div>
+      {mesesAnteriores.length>0&&(
+        <div style={{marginTop:10,padding:"10px 14px",background:"#fff",borderRadius:10,border:"1px solid #e2e8f0"}}>
+          <div style={{fontSize:12,fontWeight:600,color:"#64748b",marginBottom:6}}>📋 Historial reciente</div>
+          {mesesAnteriores.map(({mes:m,anio:a,count,total})=>(
+            <div key={`${m}-${a}`} style={{display:"flex",justifyContent:"space-between",fontSize:12,color:"#475569",padding:"3px 0",borderBottom:"1px solid #f1f5f9"}}>
+              <span>{MESES[m]} {a} — {count} pagos</span>
+              <span style={{fontWeight:600,color:"#16a34a"}}>{fmt(total)}</span>
+            </div>
+          ))}
         </div>
       )}
     </div>
@@ -322,16 +337,14 @@ function App(){
   const filtered=withEstado.filter(p=>
     p.propiedad.toLowerCase().includes(search.toLowerCase())||
     p.inquilino.toLowerCase().includes(search.toLowerCase())||
-    (p.telefono||"").includes(search)||
-    (p.dni||"").includes(search)
+    (p.telefono||"").includes(search)||(p.dni||"").includes(search)
   );
   const ts=t=>({padding:"8px 12px",borderRadius:8,border:"none",cursor:"pointer",fontWeight:600,fontSize:12,background:tab===t?"#2563eb":"#f1f5f9",color:tab===t?"#fff":"#374151"});
-
   return(
     <div style={{maxWidth:900,margin:"0 auto",padding:12}}>
       <div style={{background:"linear-gradient(135deg,#1e3a8a,#2563eb)",borderRadius:14,padding:"16px 20px",marginBottom:14,color:"#fff"}}>
         <div style={{fontSize:19,fontWeight:700}}>🏠 Panel de Alquileres</div>
-        <div style={{fontSize:12,opacity:.8,marginTop:2}}>Familia · Junio 2026 · {fmt(totalMensual)}/mes</div>
+        <div style={{fontSize:12,opacity:.8,marginTop:2}}>Familia · Junio 2026 · {fmt(totalMensual)}/mes · v21</div>
       </div>
       <div style={{display:"flex",gap:6,marginBottom:14,flexWrap:"wrap"}}>
         {[["direcciones","📍 Direcciones"],["dashboard","📊 Dashboard"],["propiedades","🏘️ Propiedades"],["pagos","💰 Pagos"],["alertas","🔔 Alertas"]].map(([t,l])=>(
@@ -357,34 +370,49 @@ function App(){
               </div>
             ))}
           </div>
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:12}}>
-            <div style={{background:"#fff",borderRadius:10,padding:14,boxShadow:"0 1px 4px rgba(0,0,0,.08)"}}>
-              <div style={{fontSize:12,color:"#64748b",marginBottom:4}}>💵 Recaudación mensual</div>
-              <div style={{fontSize:22,fontWeight:700,color:"#16a34a"}}>{fmt(totalMensual)}</div>
-            </div>
-            <div style={{background:"#fff",borderRadius:10,padding:14,boxShadow:"0 1px 4px rgba(0,0,0,.08)"}}>
-              <div style={{fontSize:12,color:"#64748b",marginBottom:4}}>📅 Recaudación anual est.</div>
-              <div style={{fontSize:22,fontWeight:700,color:"#2563eb"}}>{fmt(totalMensual*12)}</div>
-            </div>
-          </div>
+          {(()=>{
+              const mesesMostrar=[0,1,2,3,4,5];
+              const totalesMes=mesesMostrar.map(m=>({
+                mes:m,
+                total:withEstado.reduce((sum,p)=>{
+                  const mk=`2026-${m}`;
+                  let monto;
+                  if(historialMontos[p.id]&&historialMontos[p.id][mk]!==undefined)monto=historialMontos[p.id][mk];
+                  else monto=getEstado(p)==="activo"?p.cuotaActual:0;
+                  return sum+(monto||0);
+                },0)
+              }));
+              const totalAnio=totalesMes.reduce((s,m)=>s+m.total,0);
+              return(
+                <div style={{background:"#fff",borderRadius:10,padding:14,boxShadow:"0 1px 4px rgba(0,0,0,.08)",marginBottom:12}}>
+                  <div style={{fontWeight:600,fontSize:14,marginBottom:10}}>💵 Recaudación real 2026</div>
+                  {totalesMes.map(({mes:m,total})=>(
+                    <div key={m} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"6px 0",borderBottom:"1px solid #f1f5f9"}}>
+                      <span style={{fontSize:13,color:"#475569",fontWeight:m===5?"700":"400"}}>{MESES[m]}{m===5?" (actual)":""}</span>
+                      <span style={{fontWeight:700,color:total>0?"#16a34a":"#94a3b8",fontSize:13}}>{total>0?fmt(total):"—"}</span>
+                    </div>
+                  ))}
+                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 0 0",marginTop:4}}>
+                    <span style={{fontSize:14,fontWeight:700,color:"#1e293b"}}>Total acumulado</span>
+                    <span style={{fontSize:16,fontWeight:700,color:"#2563eb"}}>{fmt(totalAnio)}</span>
+                  </div>
+                </div>
+              );
+            })()}
           <div style={{background:"#fff",borderRadius:10,padding:14,boxShadow:"0 1px 4px rgba(0,0,0,.08)"}}>
             <div style={{fontWeight:600,marginBottom:10,fontSize:14}}>Resumen por dirección</div>
             {dirs.map(dir=>{
               const dp=withEstado.filter(p=>p.direccionId===dir.id);
               const da=dp.filter(p=>p.estado==="activo");
-              const dl=dp.filter(p=>p.estado==="libre");
               return(
                 <div key={dir.id} style={{padding:"10px 0",borderBottom:"1px solid #f1f5f9"}}>
                   <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                    <div>
-                      <span style={{fontWeight:600,fontSize:13}}>📍 {dir.nombre}</span>
-                      <span style={{fontSize:12,color:"#94a3b8",marginLeft:8}}>{dp.length} unidades</span>
-                    </div>
+                    <div><span style={{fontWeight:600,fontSize:13}}>📍 {dir.nombre}</span><span style={{fontSize:12,color:"#94a3b8",marginLeft:8}}>{dp.length} unidades</span></div>
                     <span style={{fontWeight:700,color:"#16a34a",fontSize:13}}>{fmt(da.reduce((s,p)=>s+p.cuotaActual,0))}/mes</span>
                   </div>
                   <div style={{display:"flex",gap:8,marginTop:4}}>
                     <span style={{fontSize:11,color:"#16a34a"}}>🟢 {da.length} activos</span>
-                    <span style={{fontSize:11,color:"#6b7280"}}>🔘 {dl.length} libres</span>
+                    <span style={{fontSize:11,color:"#6b7280"}}>🔘 {dp.filter(p=>p.estado==="libre").length} libres</span>
                     {dp.filter(p=>p.estado==="vencido").length>0&&<span style={{fontSize:11,color:"#dc2626"}}>🔴 {dp.filter(p=>p.estado==="vencido").length} vencidos</span>}
                   </div>
                 </div>
@@ -398,12 +426,11 @@ function App(){
         <div>
           <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="🔍 Buscar en todas las direcciones..."
             style={{width:"100%",padding:"9px 14px",borderRadius:8,border:"1px solid #cbd5e1",fontSize:14,marginBottom:12}}/>
-          {search ? (
+          {search?(
             <div>
-              <div style={{fontSize:12,color:"#94a3b8",marginBottom:8}}>{filtered.length} resultados en todas las direcciones</div>
+              <div style={{fontSize:12,color:"#94a3b8",marginBottom:8}}>{filtered.length} resultados</div>
               {filtered.map(p=>{
-                const days=diffDays(p.fin);const pa=proximaActualizacion(p.inicio);
-                const dir=dirs.find(d=>d.id===p.direccionId);
+                const days=diffDays(p.fin);const dir=dirs.find(d=>d.id===p.direccionId);
                 let bg="#fff";
                 if(p.estado==="vencido")bg="#fef2f2";
                 else if(p.estado==="libre")bg="#f8fafc";
@@ -418,22 +445,15 @@ function App(){
                       </div>
                     </div>
                     <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"3px 10px",fontSize:12,color:"#64748b"}}>
-                      <span>👤 {p.inquilino||"Sin inquilino"}</span>
-                      <span>💵 {fmt(p.cuotaActual)}</span>
-                      {p.telefono&&<span>📞 {p.telefono}</span>}
-                      {p.dni&&<span>🪪 {p.dni}</span>}
-                      <span>📅 Fin: {fmtDate(p.fin)}</span>
-                      {p.inicio&&<span>🔄 Próx: {pa?fmtDateObj(pa):"—"}</span>}
+                      <span>👤 {p.inquilino||"Sin inquilino"}</span><span>💵 {fmt(p.cuotaActual)}</span>
+                      {p.telefono&&<span>📞 {p.telefono}</span>}{p.dni&&<span>🪪 {p.dni}</span>}
                     </div>
                   </div>
                 );
               })}
             </div>
-          ) : (
-            dirs.map(dir=>{
-              const propsDir=withEstado.filter(p=>p.direccionId===dir.id);
-              return <DirPropCard key={dir.id} dir={dir} props={propsDir}/>;
-            })
+          ):(
+            dirs.map(dir=><DirPropCard key={dir.id} dir={dir} props={withEstado.filter(p=>p.direccionId===dir.id)}/>)
           )}
         </div>
       )}
@@ -466,6 +486,13 @@ function App(){
     </div>
   );
 }
+
+function AppConLogin(){
+  const[ok,setOk]=useState(false);
+  if(!ok)return <Login onOk={()=>setOk(true)}/>;
+  return <App/>;
+}
+
 ReactDOM.createRoot(document.getElementById("root")).render(<AppConLogin/>);
 </script>
 </body>
